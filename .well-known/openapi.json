@@ -1,0 +1,72 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Gradeless API",
+    "version": "1.0.0",
+    "description": "API for listing lessons and opening an embedded YouTube lesson page."
+  },
+  "servers": [
+    {
+      "url": "https://gradeless-app.onrender.com",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/api/lessons": {
+      "get": {
+        "operationId": "listLessons",
+        "summary": "List all lessons",
+        "description": "Returns an array of lessons with id, title, desc and youtube_id.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Lesson" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lesson/{id}": {
+      "get": {
+        "operationId": "openLesson",
+        "summary": "Open a lesson page",
+        "description": "Returns an HTML page that embeds the lesson’s YouTube video.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Lesson id (e.g., l1, l2, l3, l4)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML page",
+            "content": { "text/html": { "schema": { "type": "string" } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Lesson": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "l1" },
+          "title": { "type": "string" },
+          "desc": { "type": "string" },
+          "youtube_id": { "type": "string" }
+        },
+        "required": ["id", "title", "youtube_id"]
+      }
+    }
+  }
+}

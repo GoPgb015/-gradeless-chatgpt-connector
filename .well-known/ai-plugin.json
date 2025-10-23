@@ -1,0 +1,15 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Gradeless",
+  "name_for_model": "gradeless",
+  "description_for_human": "Browse and watch your Gradeless AI tutorial videos directly in ChatGPT.",
+  "description_for_model": "Use GET /api/lessons to list lessons. When the user picks one, open GET /lesson/{id} (HTML) to show the embedded video.",
+  "auth": { "type": "none" },
+  "api": {
+    "type": "openapi",
+    "url": "https://gradeless-app.onrender.com/openapi.json"
+  },
+  "logo_url": "https://gradeless-app.onrender.com/logo.png",
+  "contact_email": "gourab.chatterjee.25n@jaipuria.ac.in",
+  "legal_info_url": "https://gradeless-app.onrender.com"
+}

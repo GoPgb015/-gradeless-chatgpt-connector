@@ -1,0 +1,26 @@
+[
+  {
+    "id": "l1",
+    "title": "Introduction To Artificial Intelligence",
+    "desc": "Introduction to Artificial Intelligence | Part 1. Welcome to the first part of our AI series! 🚀 Learn the basics, history, and real-world applications.",
+    "youtube_id": "Xpg2bnO_-eU"
+  },
+  {
+    "id": "l2",
+    "title": "What is Prompt Engineering",
+    "desc": "What prompt engineering is, why it matters, and how it powers LLMs like ChatGPT, Gemini, and Claude.",
+    "youtube_id": "p6Yr-DVao3Y"
+  },
+  {
+    "id": "l3",
+    "title": "Components of an Effective Prompt",
+    "desc": "Key components that make a prompt effective: context, role, tone, clarity, and constraints.",
+    "youtube_id": "PAKfEvJSLWA"
+  },
+  {
+    "id": "l4",
+    "title": "Testing Out Prompts Google Gemini",
+    "desc": "Hands-on prompt experiments with Google Gemini — compare structured vs creative styles.",
+    "youtube_id": "ng5lAQay4qI"
+  }
+]
