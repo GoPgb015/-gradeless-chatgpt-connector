@@ -135,18 +135,30 @@ const playerHtml = (lesson) => `\
 mcp.registerTool(
   "show_lessons",
   {
-    title: "Show Lessons",
-    description: "Show a list of all lessons.",
-    inputSchema: { type: "object", properties: {}, additionalProperties: false }
+    description: "Show a list of all available AI tutorial lessons",
+    inputSchema: {
+      type: "object",
+      properties: {}
+    }
   },
   async () => {
-    const lessons = await readLessons();
-    return {
-      content: [
-        { type: "text", text: "Here are your Gradeless lessons." },
-        { type: "text", text: listHtml(lessons), mimeType: "text/html+skybridge" }
-      ]
-    };
+    try {
+      const lessons = await readLessons();
+      const lessonList = lessons.map(l =>
+        `• ${l.title} (ID: ${l.id})\n  ${l.desc}`
+      ).join('\n\n');
+
+      return {
+        content: [{
+          type: "text",
+          text: `Here are the available Gradeless AI tutorial lessons:\n\n${lessonList}\n\nTo watch a lesson, use open_lesson with the lesson ID.`
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error loading lessons: ${error.message}` }]
+      };
+    }
   }
 );
 
@@ -154,29 +166,45 @@ mcp.registerTool(
 mcp.registerTool(
   "open_lesson",
   {
-    title: "Open Lesson",
-    description: "Open a specific lesson by id.",
+    description: "Open and display a specific lesson video by its ID",
     inputSchema: {
       type: "object",
-      required: ["id"],
-      additionalProperties: false,
       properties: {
-        id: { type: "string", description: "Lesson id, e.g. l1, l2, l3, l4" }
-      }
+        id: {
+          type: "string",
+          description: "The lesson ID (e.g., l1, l2, l3, l4)"
+        }
+      },
+      required: ["id"]
     }
   },
-  async ({ id }) => {
-    const lessons = await readLessons();
-    const lesson = lessons.find(l => String(l.id) === String(id));
-    if (!lesson) {
-      return { content: [{ type: "text", text: `Lesson '${id}' not found.` }] };
+  async (args) => {
+    try {
+      const id = args?.id || args;
+      const lessons = await readLessons();
+      const lesson = lessons.find(l => String(l.id) === String(id));
+
+      if (!lesson) {
+        return {
+          content: [{
+            type: "text",
+            text: `Lesson '${id}' not found. Available IDs: l1, l2, l3, l4`
+          }]
+        };
+      }
+
+      const videoUrl = `https://gradeless-chatgpt-connector.onrender.com/lesson/${lesson.id}`;
+      return {
+        content: [{
+          type: "text",
+          text: `**${lesson.title}**\n\n${lesson.desc}\n\nWatch here: ${videoUrl}\n\nYouTube: https://www.youtube.com/watch?v=${lesson.youtube_id}`
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error opening lesson: ${error.message}` }]
+      };
     }
-    return {
-      content: [
-        { type: "text", text: `Playing: ${lesson.title}` },
-        { type: "text", text: playerHtml(lesson), mimeType: "text/html+skybridge" }
-      ]
-    };
   }
 );
 
