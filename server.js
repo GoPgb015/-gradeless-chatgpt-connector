@@ -208,34 +208,154 @@ mcp.registerTool(
   }
 );
 
-// Mount MCP at /mcp (streamable HTTP, per-request transport)
+// Custom MCP handler for ChatGPT compatibility
 app.post("/mcp", async (req, res) => {
   try {
-    const transport = new StreamableHTTPServerTransport({
-      enableJsonResponse: true,
-      enforceContentTypes: false
+    const body = req.body;
+    console.log("MCP Request:", JSON.stringify(body));
+
+    // Handle tools/call method
+    if (body.method === "tools/call") {
+      const toolName = body.params?.name;
+      const args = body.params?.arguments || {};
+
+      if (toolName === "show_lessons") {
+        const lessons = await readLessons();
+        const lessonList = lessons.map(l =>
+          `• ${l.title} (ID: ${l.id})\n  ${l.desc}`
+        ).join('\n\n');
+
+        res.json({
+          jsonrpc: "2.0",
+          id: body.id,
+          result: {
+            content: [{
+              type: "text",
+              text: `Here are the available Gradeless AI tutorial lessons:\n\n${lessonList}\n\nTo watch a lesson, ask me to open it by name or ID.`
+            }]
+          }
+        });
+        return;
+      }
+
+      if (toolName === "open_lesson") {
+        const id = args.id;
+        const lessons = await readLessons();
+        const lesson = lessons.find(l => String(l.id) === String(id));
+
+        if (!lesson) {
+          res.json({
+            jsonrpc: "2.0",
+            id: body.id,
+            result: {
+              content: [{
+                type: "text",
+                text: `Lesson '${id}' not found. Available IDs: l1, l2, l3, l4`
+              }]
+            }
+          });
+          return;
+        }
+
+        const videoUrl = `https://gradeless-chatgpt-connector.onrender.com/lesson/${lesson.id}`;
+        res.json({
+          jsonrpc: "2.0",
+          id: body.id,
+          result: {
+            content: [{
+              type: "text",
+              text: `**${lesson.title}**\n\n${lesson.desc}\n\nWatch here: ${videoUrl}\n\nYouTube: https://www.youtube.com/watch?v=${lesson.youtube_id}`
+            }]
+          }
+        });
+        return;
+      }
+
+      res.json({
+        jsonrpc: "2.0",
+        id: body.id,
+        error: { code: -32601, message: `Unknown tool: ${toolName}` }
+      });
+      return;
+    }
+
+    // Handle tools/list method
+    if (body.method === "tools/list") {
+      res.json({
+        jsonrpc: "2.0",
+        id: body.id,
+        result: {
+          tools: [
+            {
+              name: "show_lessons",
+              description: "Show a list of all available AI tutorial lessons",
+              inputSchema: {
+                type: "object",
+                properties: {}
+              }
+            },
+            {
+              name: "open_lesson",
+              description: "Open and display a specific lesson video by its ID",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  id: {
+                    type: "string",
+                    description: "The lesson ID (e.g., l1, l2, l3, l4)"
+                  }
+                },
+                required: ["id"]
+              }
+            }
+          ]
+        }
+      });
+      return;
+    }
+
+    // Handle initialize method
+    if (body.method === "initialize") {
+      res.json({
+        jsonrpc: "2.0",
+        id: body.id,
+        result: {
+          protocolVersion: "2024-11-05",
+          capabilities: {
+            tools: {}
+          },
+          serverInfo: {
+            name: "gradeless-mcp",
+            version: "1.0.0"
+          }
+        }
+      });
+      return;
+    }
+
+    res.json({
+      jsonrpc: "2.0",
+      id: body.id,
+      error: { code: -32601, message: `Unknown method: ${body.method}` }
     });
-    res.on("close", () => transport.close());
-    await mcp.connect(transport);
-    await transport.handleRequest(req, res, req.body);
+
   } catch (err) {
     console.error("MCP POST error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      jsonrpc: "2.0",
+      id: req.body?.id || null,
+      error: { code: -32000, message: err.message }
+    });
   }
 });
+
 app.get("/mcp", async (req, res) => {
-  try {
-    const transport = new StreamableHTTPServerTransport({
-      enableJsonResponse: true,
-      enforceContentTypes: false
-    });
-    res.on("close", () => transport.close());
-    await mcp.connect(transport);
-    await transport.handleRequest(req, res, null);
-  } catch (err) {
-    console.error("MCP GET error:", err);
-    res.status(500).json({ error: err.message });
-  }
+  res.json({
+    name: "gradeless-mcp",
+    version: "1.0.0",
+    description: "MCP server for Gradeless AI tutorials",
+    tools: ["show_lessons", "open_lesson"]
+  });
 });
 
 // Optional warm-up endpoint
