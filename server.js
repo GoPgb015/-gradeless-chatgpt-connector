@@ -182,16 +182,32 @@ mcp.registerTool(
 
 // Mount MCP at /mcp (streamable HTTP, per-request transport)
 app.post("/mcp", async (req, res) => {
-  const transport = new StreamableHTTPServerTransport({ enableJsonResponse: true });
-  res.on("close", () => transport.close());
-  await mcp.connect(transport);
-  await transport.handleRequest(req, res, req.body);
+  try {
+    const transport = new StreamableHTTPServerTransport({
+      enableJsonResponse: true,
+      enforceContentTypes: false
+    });
+    res.on("close", () => transport.close());
+    await mcp.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+  } catch (err) {
+    console.error("MCP POST error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 app.get("/mcp", async (req, res) => {
-  const transport = new StreamableHTTPServerTransport({ enableJsonResponse: true });
-  res.on("close", () => transport.close());
-  await mcp.connect(transport);
-  await transport.handleRequest(req, res, null);
+  try {
+    const transport = new StreamableHTTPServerTransport({
+      enableJsonResponse: true,
+      enforceContentTypes: false
+    });
+    res.on("close", () => transport.close());
+    await mcp.connect(transport);
+    await transport.handleRequest(req, res, null);
+  } catch (err) {
+    console.error("MCP GET error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Optional warm-up endpoint
