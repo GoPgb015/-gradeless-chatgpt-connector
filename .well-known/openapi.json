@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://gradeless-app.onrender.com",
+      "url": "https://gradeless-chatgpt-connector.onrender.com",
       "description": "Production"
     }
   ],

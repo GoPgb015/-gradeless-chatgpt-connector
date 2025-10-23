@@ -7,9 +7,9 @@
   "auth": { "type": "none" },
   "api": {
     "type": "openapi",
-    "url": "https://gradeless-app.onrender.com/openapi.json"
+    "url": "https://gradeless-chatgpt-connector.onrender.com/openapi.json"
   },
-  "logo_url": "https://gradeless-app.onrender.com/logo.png",
+  "logo_url": "https://gradeless-chatgpt-connector.onrender.com/logo.png",
   "contact_email": "gourab.chatterjee.25n@jaipuria.ac.in",
-  "legal_info_url": "https://gradeless-app.onrender.com"
+  "legal_info_url": "https://gradeless-chatgpt-connector.onrender.com"
 }
